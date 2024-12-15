@@ -1,6 +1,9 @@
 from tkinter import *
 
+import db
 
+
+db.db_setup()
 
 root = Tk()
 root.title("Memo")
