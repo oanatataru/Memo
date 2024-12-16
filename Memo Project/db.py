@@ -38,6 +38,25 @@ def select_all():
             con.close()
 
 
+def select(id):
+    global con, cursor
+    try:
+        con = sql.connect("memo.db")
+        cursor = con.cursor()
+        query_select = "SELECT * FROM notes WHERE id=?"
+        cursor.execute(query_select, (id,))
+        return cursor.fetchall()
+    except sql.DatabaseError as e:
+        if con:
+            con.rollback()
+            print(e)
+    finally:
+        if cursor:
+            cursor.close()
+        if con:
+            con.close()
+
+
 def add(title, content, tasks, note_type):
     global con, cursor
     try:
@@ -45,6 +64,25 @@ def add(title, content, tasks, note_type):
         cursor = con.cursor()
         query_insert = "INSERT INTO notes (title, content, tasks, note_type) VALUES (?, ?, ?, ?)"
         cursor.execute(query_insert, (title, content, tasks, note_type))
+        con.commit()
+    except sql.DatabaseError as e:
+        if con:
+            con.rollback()
+            print(e)
+    finally:
+        if cursor:
+            cursor.close()
+        if con:
+            con.close()
+
+
+def edit(id, title, content, tasks):
+    global con, cursor
+    try:
+        con = sql.connect("memo.db")
+        cursor = con.cursor()
+        query_update = "UPDATE notes SET title=?, content=?, tasks=? WHERE id=?"
+        cursor.execute(query_update, (title, content, tasks, id))
         con.commit()
     except sql.DatabaseError as e:
         if con:

@@ -21,22 +21,39 @@ def load_notes():
         title_label = Label(note_frame, bg='#B93B3B', fg='white', text=str(note[1]), anchor="w", font=('Verdana', 11, 'bold'), relief='flat')
         title_label.pack(side=TOP, padx=0,pady=5, fill=X)
 
-        content_text = Text(note_frame, wrap='word', width=40, height=6, bg='#B93B3B', fg='white', font=('Verdana', 9), relief='flat')
-        content_text.insert('1.0', str(note[2]))
+        content_text = Text(note_frame, wrap='word', width=40, height=6, bg='#B93B3B', fg='white', font=('Verdana', 9),
+                            relief='flat')
+        if note[-1] == 1:
+            content_text.insert('1.0', str(note[2]))
         content_text.configure(state='disabled')
         content_text.pack(side=TOP, padx=0, pady=10, anchor='w')
 
-        btn_update = Button(note_frame, text='Modify', padx=2, pady=2, bg='black', fg='white', font=('Verdana', 10, 'bold'), relief='flat')
+        if note[-1] == 1:
+            btn_update = Button(note_frame, text='Modify', command=lambda id_label=id_label: note_popup(id_label), padx=2, pady=2, bg='black', fg='white', font=('Verdana', 10, 'bold'), relief='flat')
         btn_update.pack(side=BOTTOM, padx=0, pady=0)
 
 
-def note_popup():
+def note_popup(param=None):
     def add_note():
         note_title = field_title.get("1.0", "end-1c")
         note_content = field_content.get("1.0", "end-1c")
         db.add(note_title, note_content, None, 1)
         popup.destroy()
         load_notes()
+
+    def edit_note():
+        id = param.cget("text")[1:]
+        updated_title = field_title.get("1.0", "end-1c")
+        updated_content = field_content.get("1.0", "end-1c")
+        db.edit(id, updated_title, updated_content, None)
+        popup.destroy()
+        load_notes()
+
+    if param is not None:
+        id = param.cget("text")[1:]
+        prev_note = db.select(id)
+        prev_title = prev_note[0][1]
+        prev_content = prev_note[0][2]
 
     popup = Toplevel(root)
     popup.overrideredirect(True)
@@ -46,22 +63,28 @@ def note_popup():
     label_title = Label(popup, text="Tile", font=("Verdana", 14), bg='#B93B3B', fg='white', anchor="w")
     label_title.pack(fill="x", pady=(60, 20), padx=60, anchor="w")
     field_title = Text(popup, bg='#FFF8DC', fg='black', font=('Verdana', 14), height=1, relief="flat")
+    if param is not None:
+        field_title.insert("1.0", prev_title)
     field_title.pack(pady=0, fill=X, padx=60, anchor="w")
 
     label_content = Label(popup, text="Content", font=('Verdana', 14), bg='#B93B3B', fg='white', anchor="w")
     label_content.pack(fill="x", pady=20, padx=60)
     field_content = Text(popup, wrap=WORD, padx=10, pady=10, bg='#FFF8DC', fg='black',font=('Verdana', 12), height=10)
+    if param is not None:
+        field_content.insert("1.0", prev_content)
     field_content.pack(pady=0, fill=BOTH, padx=60)
 
     btn_frame = Frame(popup, bg='#B93B3B')
     btn_frame.pack(side=BOTTOM, pady=(20, 60), padx=60, anchor="w")
 
-    btn_save = Button(btn_frame, text="SAVE", command=add_note, bd=1, bg="#2E7D32", fg="white", padx=20, pady=7, font=("Verdana", 10, "bold"), relief="solid")
+    if param is None:
+        btn_save = Button(btn_frame, text="SAVE", command=add_note, bd=1, bg="#2E7D32", fg="white", padx=20, pady=7, font=("Verdana", 10, "bold"), relief="solid")
+    else:
+        btn_save = Button(btn_frame, text="SAVE", command=edit_note, bd=1, bg="#2E7D32", fg="white", padx=20, pady=7, font=("Verdana", 10, "bold"), relief="solid")
     btn_save.pack(side=LEFT, padx=68)
 
     btn_close = Button(btn_frame, text="EXIT", command=popup.destroy, bd=1, bg="#B71C1C", fg="white", padx=15, pady=7, font=("Verdana", 10, "bold"), relief="solid")
     btn_close.pack(side=LEFT, padx=68)
-
 
 
 
