@@ -44,7 +44,7 @@ def load_notes():
         if note[-1] == 1:
             btn_update = Button(note_frame, text='Modify', command=lambda id_label=id_label: note_popup(id_label), padx=2, pady=2, bg='black', fg='white', font=('Verdana', 10, 'bold'), relief='flat')
         else:
-            btn_update = Button(note_frame, text='Modify', padx=2, pady=2, bg='black', fg='white', font=('Verdana', 10, 'bold'), relief='flat')
+            btn_update = Button(note_frame, text='Modify', command=lambda id_label=id_label: todo_list_popup(id_label), padx=2, pady=2, bg='black', fg='white', font=('Verdana', 10, 'bold'), relief='flat')
         btn_update.pack(side=BOTTOM, padx=0, pady=0)
 
 
@@ -102,7 +102,7 @@ def note_popup(param=None):
     btn_close.pack(side=LEFT, padx=68)
 
 
-def todo_list_popup():
+def todo_list_popup(param=None):
     def add_todo_list():
         todo_title = field_title.get("1.0", "end-1c")
         todo_tasks = [line.split(" ", 1)[1] for line in listbox_task.get(0, "end") if " " in line]
@@ -110,6 +110,16 @@ def todo_list_popup():
         db.add(todo_title, None, todo_tasks_json, 2)
         popup.destroy()
         load_notes()
+
+    def edit_todo_list():
+        id = param.cget("text")[1:]
+        updated_title = field_title.get("1.0", "end-1c")
+        updated_tasks = [line.split(" ", 1)[1] for line in listbox_task.get(0, "end") if " " in line]
+        todo_tasks_json = json.dumps(updated_tasks)
+        db.edit(id, updated_title, None, todo_tasks_json)
+        popup.destroy()
+        load_notes()
+
 
     def add_task():
         task_string = field_task.get()
@@ -157,7 +167,14 @@ def todo_list_popup():
         field_task.delete(0, 'end')
         field_task.configure(fg="black")
 
-    tasks = []
+    if param is not None:
+        id = param.cget("text")[1:]
+        prev_note = db.select(id)
+        prev_title = prev_note[0][1]
+        prev_tasks = json.loads(prev_note[0][3])
+        tasks = prev_tasks
+    else:
+        tasks = []
 
     popup = Toplevel(root)
     popup.overrideredirect(True)
@@ -167,6 +184,8 @@ def todo_list_popup():
     label_title = Label(popup, text="Tile", font=("Verdana", 12), bg='#B93B3B', fg='white', anchor="w")
     label_title.pack(fill="x", pady=(60, 20), padx=60, anchor="w")
     field_title = Text(popup, padx=10, pady=10, bg='#FFF8DC', fg='black', font=('Verdana', 12), height=1, )
+    if param is not None:
+        field_title.insert("1.0", prev_title)
     field_title.pack(pady=0, fill=X, padx=60, anchor="w")
 
     main_frame = Frame(popup, bg="#B93B3B")
@@ -190,12 +209,18 @@ def todo_list_popup():
     btn_del_all_tasks.place(x=60, y=210)
 
     listbox_task = Listbox(listbox_frame, bd=10, width=26, height=12, selectmode='SINGLE', bg="white", fg="black", selectbackground="#FFF8DC", selectforeground="black", font=("Verdana", 10), relief="flat")
+    if param is not None:
+        for i, task in enumerate(prev_tasks, start=1):
+            listbox_task.insert("end", f"{i}. {task}")
     listbox_task.place(x=0, y=15)
 
     btn_frame = Frame(popup, bg='#B93B3B')
     btn_frame.pack(side=BOTTOM, pady=(20, 60), padx=60, anchor="w")
 
-    btn_save = Button(btn_frame, text="SAVE", command=add_todo_list, bd=1, bg="#2E7D32", fg="white", padx=20, pady=7, font=("Verdana", 10, "bold"), relief="solid")
+    if param is None:
+        btn_save = Button(btn_frame, text="SAVE", command=add_todo_list, bd=1, bg="#2E7D32", fg="white", padx=20, pady=7, font=("Verdana", 10, "bold"), relief="solid")
+    else:
+        btn_save = Button(btn_frame, text="SAVE", command=edit_todo_list, bd=1, bg="#2E7D32", fg="white", padx=20, pady=7, font=("Verdana", 10, "bold"), relief="solid")
     btn_save.pack(side=LEFT, padx=68)
 
     btn_close = Button(btn_frame, text="EXIT", command=popup.destroy, bd=1, bg="#B71C1C", fg="white", padx=15, pady=7, font=("Verdana", 10, "bold"), relief="solid")
