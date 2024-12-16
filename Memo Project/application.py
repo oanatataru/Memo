@@ -22,10 +22,7 @@ def load_notes():
         btn_frame.pack(side=TOP, pady=0, padx=0)
         id_label = Label(btn_frame, bg='#B93B3B', fg='white', text='#'+str(note[0]), font=('Verdana', 10, 'bold'))
         id_label.pack(side=LEFT, padx=(0, 75))
-        if note[-1] == 1:
-            btn_delete = Button(btn_frame, text="X", command=lambda id_label=id_label: delete_note(id_label), padx=2, pady=0, bg="black", fg="white", font=('Verdana', 8, "bold"), relief="flat")
-        else:
-            btn_delete = Button(btn_frame, text="X", padx=2, pady=0, bg="black", fg="white", font=('Verdana', 8, "bold"), relief="flat")
+        btn_delete = Button(btn_frame, text="X", command=lambda id_label=id_label: delete_note(id_label), padx=2, pady=0, bg="black", fg="white", font=('Verdana', 8, "bold"), relief="flat")
         btn_delete.pack(side=RIGHT, padx=(75, 0))
 
         title_label = Label(note_frame, bg='#B93B3B', fg='white', text=str(note[1]), anchor="w", font=('Verdana', 11, 'bold'), relief='flat')
@@ -46,6 +43,7 @@ def load_notes():
         else:
             btn_update = Button(note_frame, text='Modify', command=lambda id_label=id_label: todo_list_popup(id_label), padx=2, pady=2, bg='black', fg='white', font=('Verdana', 10, 'bold'), relief='flat')
         btn_update.pack(side=BOTTOM, padx=0, pady=0)
+
 
 
 def note_popup(param=None):
