@@ -19,6 +19,26 @@ def db_setup():
     conn.close()
 
 
+def delete(id):
+    global con, cursor
+    try:
+        note_id = id.cget("text")[1:]
+        con = sql.connect("memo.db")
+        cursor = con.cursor()
+        query_delete = "DELETE FROM notes WHERE id = ?"
+        cursor.execute(query_delete, (note_id,))
+        con.commit()
+    except sql.DatabaseError as e:
+        if con:
+            con.rollback()
+            print(e)
+    finally:
+        if cursor:
+            cursor.close()
+        if con:
+            con.close()
+
+
 def select_all():
     global con, cursor
     try:

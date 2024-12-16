@@ -4,6 +4,12 @@ import db
 
 
 def load_notes():
+    def delete_note(id_label):
+        db.delete(id_label)
+        for widget in scrollable_frame.winfo_children():
+            widget.destroy()
+        load_notes()
+
     notes = db.select_all()
 
     for i, note in enumerate(notes):
@@ -15,14 +21,13 @@ def load_notes():
         btn_frame.pack(side=TOP, pady=0, padx=0)
         id_label = Label(btn_frame, bg='#B93B3B', fg='white', text='#'+str(note[0]), font=('Verdana', 10, 'bold'))
         id_label.pack(side=LEFT, padx=(0, 75))
-        btn_delete = Button(btn_frame, text="X", padx=2, pady=0, bg="black", fg="white", font=('Verdana', 8, "bold"), relief="flat")
+        btn_delete = Button(btn_frame, text="X", command=lambda id_label=id_label: delete_note(id_label), padx=2, pady=0, bg="black", fg="white", font=('Verdana', 8, "bold"), relief="flat")
         btn_delete.pack(side=RIGHT, padx=(75, 0))
 
         title_label = Label(note_frame, bg='#B93B3B', fg='white', text=str(note[1]), anchor="w", font=('Verdana', 11, 'bold'), relief='flat')
         title_label.pack(side=TOP, padx=0,pady=5, fill=X)
 
-        content_text = Text(note_frame, wrap='word', width=40, height=6, bg='#B93B3B', fg='white', font=('Verdana', 9),
-                            relief='flat')
+        content_text = Text(note_frame, wrap='word', width=40, height=6, bg='#B93B3B', fg='white', font=('Verdana', 9), relief='flat')
         if note[-1] == 1:
             content_text.insert('1.0', str(note[2]))
         content_text.configure(state='disabled')
